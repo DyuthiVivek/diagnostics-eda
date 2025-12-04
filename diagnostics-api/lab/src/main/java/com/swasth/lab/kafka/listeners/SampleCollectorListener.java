@@ -4,6 +4,7 @@ import com.swasth.lab.model.LabOrder;
 import com.swasth.lab.repository.LabOrderRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SampleCollectorListener {
@@ -27,7 +29,7 @@ public class SampleCollectorListener {
             @Payload Map<String, Object> event,
             @Header(KafkaHeaders.RECEIVED_KEY) String orderId
     ) {
-        System.out.println("[Collector] Received order.placed for orderId=" + orderId);
+        log.info("[Collector] Received order.placed for orderId={}", orderId);
 
         UUID oid = UUID.fromString(orderId);
         LabOrder order = repo.findById(oid).orElse(null);
@@ -46,6 +48,6 @@ public class SampleCollectorListener {
         );
 
         kafkaTemplate.send("diagnostics.sample.collected", orderId, out);
-        System.out.println(" Published sample.collected for orderId=" + orderId);
+        log.info("Published sample.collected for orderId={}", orderId);
     }
 }
